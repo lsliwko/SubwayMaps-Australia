@@ -1,0 +1,190 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>SubwayMaps (Australia)</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		
+<!--	<script type="text/javascript" charset="utf-8" src="scripts/cordova.js"></script>	-->
+		
+		<script type="text/javascript" charset="utf-8" src="scripts/jquery/jquery.js"></script>
+		<script type="text/javascript">
+		$(document).bind("mobileinit", function(){
+		    $.mobile.ajaxEnabled = false;
+		    $.mobile.pushStateEnabled = false;
+		    $.mobile.touchOverflowEnabled = false;
+		    $.mobile.defaultPageTransition  = 'slide';
+		    $.mobile.defaultDialogTransition = 'pop';
+		    $.mobile.transitionFallbacks.slide = 'none';
+		    $.mobile.transitionFallbacks.pop = 'none';
+		    $.mobile.buttonMarkup.hoverDelay = 0;
+		    $.mobile.phonegapNavigationEnabled = true;
+		});
+		</script>
+		<script type="text/javascript" charset="utf-8" src="scripts/jquery/jquery.mobile.js"></script>
+				
+		<script type="text/javascript" charset="utf-8" src="scripts/jquery/flexcroll.js"></script>
+		
+		<script type="text/javascript" charset="utf-8" src="scripts/domain.js"></script>
+		<script type="text/javascript" charset="utf-8" src="scripts/commons.js"></script>
+		
+		
+		<link rel="stylesheet" type="text/css" href="css/jquery.mobile.css"/>
+		<link rel="stylesheet" type="text/css" href="css/flexcrollstyles.css"/>
+		
+		<style type="text/css">
+			.vscrollerbase, .hscrollerbase {
+				visibility: hidden !important; /* visible */
+			}
+			
+			.vscrollerbar, .hscrollerbar { 
+				padding: 0px;
+			}
+		</style>
+		<script type="text/javascript" charset="utf-8">
+		
+			var defaultCity	= 'Sydney';
+			var tubeMapsImages = {
+				'Adelaide': new CityTubeMap('Adelaide','images/adelaide-map.gif'),
+				'Auckland': new CityTubeMap('Auckland','images/auckland-map.gif'),
+				'Brisbane': new CityTubeMap('Brisbane','images/brisbane-map.gif'),
+				'Goldcoast': new CityTubeMap('Goldcoast','images/goldcoast-map.gif'),
+				'Melbourne': new CityTubeMap('Melbourne','images/melbourne-map.gif'),
+				'Perth': new CityTubeMap('Perth','images/perth-map.gif'),
+				'Sydney': new CityTubeMap('Sydney','images/sydney-map.gif'),
+				'Wellington': new CityTubeMap('Wellington','images/wellington-map.gif')
+			};
+			
+			var windowHeight;
+			var windowWidth;
+			var footerHeight;
+			var localStorageEnabled;
+			
+			var pageTubeMap;
+			var pageTubeMapImage;
+			
+			function loaded() {
+				console.log('loaded');
+				
+				//disable taping footer
+				$("[data-role=footer]").fixedtoolbar({ tapToggle: false });
+			
+				windowHeight	= $(window).height();
+				windowWidth		= $(window).width();
+				footerHeight	= $('#main-footer').height();
+				
+				pageTubeMap			= $('#page-tube-map');
+				pageTubeMapImage	= $('#page-tube-map-image');
+				
+				pageTubeMap.height(windowHeight-footerHeight);
+				pageTubeMap.width(windowWidth);
+				
+				//does local storage exist?
+				if (window.localStorage) {
+					localStorageEnabled	= true;
+				} else {
+					localStorageEnabled	= false;
+				}
+				
+				
+	  			fleXenv.fleXcrollMain('page-tube-map');
+	  			
+	  			fleXenv.fleXcrollMain('city-menu-popup-list');
+	  			
+	  			//load city from local storage
+				updateTubeMap();
+			}
+			
+			function updateTubeMap(city) {
+				console.log('updateTubeMap[' + city +']');
+				
+				$('#city-menu-popup').popup('close');
+			
+				if (!city) {
+					if (localStorageEnabled) {
+						var lastSelectedCity = window.localStorage.getItem("keyLastSelectedCity");
+						if (lastSelectedCity) {
+							city	= lastSelectedCity;
+						} else {
+							city	= defaultCity;
+						}					
+					} else {
+						city	= defaultCity;
+					}
+				}
+				
+				var tubeMap	= tubeMapsImages[city];
+				if (tubeMap==undefined) {
+					alert('Error: City ' + city + ' not found!');
+					tubeMap	= tubeMapsImages[defaultCity];
+				}
+				
+				pageTubeMapImage.attr('src',tubeMap.imagePath);
+				
+				if (localStorageEnabled) {
+					window.localStorage.setItem("keyLastSelectedCity", city);
+				}
+				
+				if (pageTubeMap.fleXcroll) { 
+					pageTubeMap.fleXcroll.setScrollPos(0,0);
+				}
+			}
+
+			document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+
+			document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 500); }, false);
+			//window.addEventListener('load', setTimeout(function () { loaded(); }, 500), false);
+		</script>
+	</head>
+	
+	//TODO zoomming image
+	// load nbew city - reset position to 0,0
+	
+	<body>
+		<!--- Main Page --->
+		<div data-role="page" id="main-page" data-theme="d">
+			
+			<div data-role="popup" id="city-menu-popup">
+				<ul data-role="listview" data-filter="false" data-autodividers="true" data-inset="true" style="min-height:300px; max-height:500px; min-width:200px;" data-theme="c" data-divider-theme="c" id="city-menu-popup-list">
+					<li><a href="#" onClick="updateTubeMap('Adelaide')">Adelaide</a></li>
+					<li><a href="#" onClick="updateTubeMap('Auckland')">Auckland</a></li>
+					<li><a href="#" onClick="updateTubeMap('Brisbane')">Brisbane</a></li>
+					<li><a href="#" onClick="updateTubeMap('Goldcoast')">Goldcoast</a></li>
+					<li><a href="#" onClick="updateTubeMap('Melbourne')">Melbourne</a></li>
+					<li><a href="#" onClick="updateTubeMap('Perth')">Perth</a></li>
+					<li><a href="#" onClick="updateTubeMap('Sydney')">Sydney</a></li>
+					<li><a href="#" onClick="updateTubeMap('Wellington')">Wellington</a></li>
+				</ul>
+			</div>
+			
+			<div data-role="popup" id="info-popup" data-theme="c">
+				<p>
+				<div>
+					<center>
+					<img src="icons/icon-36.png" style="vertical-align: middle;"/>
+					<span style="vertical-align: middle;"><strong>SubwayMaps (Australia) v1.4.0</strong></span>
+					</center>
+				</div>
+				</p>
+				<p>Developed by AXIS APPLICATIONS<p>
+				<p>Homepage:<br><a href="http://www.axisapplications.com">www.axisapplications.com</a><p>
+				<p>E-Mail:<br><a href="mailto:support@axisapplications.com">support@axisapplications.com</a><p>
+				<p>Thanks to Robert Schwandl for his maps!<p>
+			</div>
+  			
+  			<div data-role="content" id="page-tube-map" style="overflow: auto; position: relative; padding: 0px;">
+				<!-- dynamic content -->
+				<img id='page-tube-map-image' src="" onLoad="fleXenv.updateScrollBars();"/>
+			</div>
+
+  			<div data-role="footer" data-position="fixed" data-theme="c" class="nav-menu" id="main-footer">
+				<div data-role="navbar" class="nav-menu">
+					<ul>
+						<li><a href="#city-menu-popup" id="main-footer-city" data-icon="search" data-rel="popup">City</a></li>
+						<li><a href="#info-popup" id="main-footer-info" data-icon="info" data-rel="popup">Info</a></li>
+					</ul>
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>
